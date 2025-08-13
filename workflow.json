@@ -133,7 +133,20 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  instances: [\n    {\n      prompt:\n        $node[\"Ask For Prompt\"].json.data\n          ? $node[\"Ask For Prompt\"].json.data.text\n          : $node[\"Ask For Prompt\"].json.message.text,\n      image: {\n        imageBytes: $binary.data.data\n      }\n    }\n  ],\n  parameters: {\n    aspectRatio: \"16:9\",\n    videoDuration: \"8s\"\n  }\n}\n",
+        "jsonBody": {
+          "instances": [
+            {
+              "prompt": "={{$node[\"Ask For Prompt\"].json.data ? $node[\"Ask For Prompt\"].json.data.text : $node[\"Ask For Prompt\"].json.message.text}}",
+              "image": {
+                "imageBytes": "{{$binary.data.data}}"
+              }
+            }
+          ],
+          "parameters": {
+            "aspectRatio": "16:9",
+            "videoDuration": "8s"
+          }
+        },
         "options": {
           "response": {
             "response": {
@@ -415,7 +428,20 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  instances: [\n    {\n      prompt: $node[\"Ask For Prompt1\"].json.data ? $node[\"Ask For Prompt1\"].json.data.text : $node[\"Ask For Prompt1\"].json.message.text,\n      image: { imageBytes: $binary.data.data }\n    }\n  ],\n  parameters: { aspectRatio: \"16:9\", videoDuration: \"8s\" }\n}\n",
+        "jsonBody": {
+          "instances": [
+            {
+              "prompt": "={{$node[\"Ask For Prompt1\"].json.data ? $node[\"Ask For Prompt1\"].json.data.text : $node[\"Ask For Prompt1\"].json.message.text}}",
+              "image": {
+                "imageBytes": "{{$binary.data.data}}"
+              }
+            }
+          ],
+          "parameters": {
+            "aspectRatio": "16:9",
+            "videoDuration": "8s"
+          }
+        },
         "options": {
           "response": {
             "response": {
