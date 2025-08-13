@@ -1,0 +1,827 @@
+{
+  "name": "VEO3 Creation - Not working",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-I79B5i87XRU_kMXAqaGhzuLC4FTWHY6",
+          "mode": "list",
+          "cachedResultName": "1. POV Images",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-I79B5i87XRU_kMXAqaGhzuLC4FTWHY6"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "6b256ca1-85ae-413f-9951-ea8c272baa7b",
+      "name": "Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        160
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "download",
+        "fileId": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "28408f28-8d30-4796-9045-64bd1a6fc695",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        160
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "1589175537",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "=<b>New image:</b> {{ $('Download Image').item.json.name }}"
+        }
+      },
+      "id": "703025ac-c143-4425-b12c-525259832acc",
+      "name": "Send Image",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        48
+      ],
+      "webhookId": "2bcb23e2-495c-4b9f-922f-f274b75b55ca",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "1589175537",
+        "message": "Please describe the video you want for <b>{{ $('Download Image').item.json.name }}</b>.\nInclude: subject, action, style, camera movement, and any audio cues.\n\nExample 1:\nSubject: glossy black smartwatch with a glowing screen;\nAction: slow rotation in midair, screen pulses with colorful graphics;\nStyle: futuristic minimalism, cool blue and purple lighting, reflective surfaces;\nCamera movement: start wide, dolly in, pan around to highlight design;\nAudio: soft electronic music with subtle chimes.\n\nExample 2:\nSubject: stainless-steel water bottle on a sunny kitchen table;\nAction: hand picks up, unscrews lid, pours water, sets down;\nStyle: warm natural light, rustic vibe, shallow depth of field;\nCamera movement: smooth left-to-right slider, end with logo close-up;\nAudio: gentle background music and water pour.",
+        "responseType": "freeText",
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 5,
+              "resumeUnit": "minutes"
+            }
+          }
+        }
+      },
+      "id": "79611fe4-f81d-4e75-bb48-9f5a1ca06bd5",
+      "name": "Ask For Prompt",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        160
+      ],
+      "webhookId": "6975f198-bc6b-445b-89f6-ad0c178876fd",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/veo-3.0-generate-preview:predictLongRunning",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyCbOG-4BXacSv-b_hX8S7pTBCjPDPO-jHw"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  instances: [\n    {\n      prompt:\n        $node[\"Ask For Prompt\"].json.data\n          ? $node[\"Ask For Prompt\"].json.data.text\n          : $node[\"Ask For Prompt\"].json.message.text,\n      image: {\n        imageBytes: $binary.data.data\n      }\n    }\n  ],\n  parameters: {\n    aspectRatio: \"16:9\",\n    videoDuration: \"8s\"\n  }\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 12000
+        }
+      },
+      "id": "4bb58019-1bba-4064-acdc-e64bd3cc76f3",
+      "name": "Generate Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://generativelanguage.googleapis.com/v1beta/' + $json.name + '?key=' + $env.GEMINI_API_KEY }}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "32a558e2-dbdf-47fa-a56d-8c6d0e0cb25d",
+      "name": "Poll Operation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.done }}"
+            }
+          ]
+        }
+      },
+      "id": "65a43a1a-e43c-4322-82fd-2d478b8cc106",
+      "name": "IF Done?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        0,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "6ec77e99-a7e5-4485-b630-073e7c4aa72a",
+      "name": "Wait 10s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        288
+      ],
+      "webhookId": "ba5a979f-b105-45f4-8b4b-e0945fcaaafd"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response.generateVideoResponse.generatedSamples[0].video.uri }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "={{$env.GEMINI_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {}
+        }
+      },
+      "id": "5d1d4158-deaf-41c8-b784-f33b4b67e90d",
+      "name": "Download Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "binaryData": true,
+        "binaryPropertyName": "videoData",
+        "name": "TikTok",
+        "parents": {
+          "__rl": true,
+          "value": "={{ $env.GDRIVE_OUT_FOLDER_ID }}",
+          "mode": "list",
+          "cachedResultName": "Output Folder"
+        },
+        "options": {}
+      },
+      "id": "1157e83a-55ba-4d7a-9752-e496ed23dddf",
+      "name": "Upload Video",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 1,
+      "position": [
+        448,
+        208
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "1589175537",
+        "binaryData": true,
+        "binaryPropertyName": "videoData",
+        "additionalFields": {
+          "caption": "=Here is your generated video for <b>{{ $('Download Image').item.json.name }}</b>. Reply “approve” or “regen”."
+        }
+      },
+      "id": "f23281eb-bee9-400b-a26e-caead7b994be",
+      "name": "Send Final Video",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        672,
+        208
+      ],
+      "webhookId": "c6d63b38-b2d8-48f8-a31c-1901f27c51a2",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1-I79B5i87XRU_kMXAqaGhzuLC4FTWHY6",
+          "mode": "list",
+          "cachedResultName": "1. POV Images",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1-I79B5i87XRU_kMXAqaGhzuLC4FTWHY6"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "5142c7f4-5b05-475d-be04-1556df2f0499",
+      "name": "Drive Trigger1",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1472,
+        -464
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "download",
+        "fileId": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "ca10bd2a-c0f3-4e1d-af7c-2125d73e1b97",
+      "name": "Download Image1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        -464
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "1589175537",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "=<b>New image:</b> {{ $('Download Image1').item.json.name }}"
+        }
+      },
+      "id": "69a23501-34ca-4df3-8b39-bfd331cfb306",
+      "name": "Send Image1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        -464
+      ],
+      "webhookId": "2bcb23e2-495c-4b9f-922f-f274b75b55ca",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "1589175537",
+        "message": "Please describe the video you want for <b>{{ $('Download Image').item.json.name }}</b>.\nInclude: subject, action, style, camera movement, and any audio cues.\n\nExample 1:\nSubject: glossy black smartwatch with a glowing screen;\nAction: slow rotation in midair, screen pulses with colorful graphics;\nStyle: futuristic minimalism, cool blue and purple lighting, reflective surfaces;\nCamera movement: start wide, dolly in, pan around to highlight design;\nAudio: soft electronic music with subtle chimes.\n\nExample 2:\nSubject: stainless-steel water bottle on a sunny kitchen table;\nAction: hand picks up, unscrews lid, pours water, sets down;\nStyle: warm natural light, rustic vibe, shallow depth of field;\nCamera movement: smooth left-to-right slider, end with logo close-up;\nAudio: gentle background music and water pour.",
+        "responseType": "freeText",
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeUnit": "minutes"
+            }
+          },
+          "appendAttribution": true
+        }
+      },
+      "id": "19d69d5d-b62e-43a3-85a8-ac725decb985",
+      "name": "Ask For Prompt1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -464
+      ],
+      "webhookId": "6975f198-bc6b-445b-89f6-ad0c178876fd",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/veo-3.0-generate-preview:predictLongRunning",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyCbOG-4BXacSv-b_hX8S7pTBCjPDPO-jHw"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  instances: [\n    {\n      prompt: $node[\"Ask For Prompt1\"].json.data ? $node[\"Ask For Prompt1\"].json.data.text : $node[\"Ask For Prompt1\"].json.message.text,\n      image: { imageBytes: $binary.data.data }\n    }\n  ],\n  parameters: { aspectRatio: \"16:9\", videoDuration: \"8s\" }\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "c6bcf621-aca2-4dee-80ef-0aa7963b81cb",
+      "name": "Generate Video1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -560,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://generativelanguage.googleapis.com/v1beta/' + $json.name + '?key=' + $env.GEMINI_API_KEY }}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "63164865-d610-4c03-8f59-90afc3bcc68b",
+      "name": "Poll Operation1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        -464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.done }}"
+            }
+          ]
+        }
+      },
+      "id": "4a178aa1-73c3-4e4d-8859-2a7af0cc17d4",
+      "name": "IF Done?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "618e333d-f95b-4a9a-85fe-8dc51460ea12",
+      "name": "Wait 10s1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -512
+      ],
+      "webhookId": "ba5a979f-b105-45f4-8b4b-e0945fcaaafd"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response.generateVideoResponse.generatedSamples[0].video.uri }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyCbOG-4BXacSv-b_hX8S7pTBCjPDPO-jHw"
+            }
+          ]
+        },
+        "options": {
+          "response": {}
+        }
+      },
+      "id": "814a92e8-59d6-48fe-9f51-aec5f1cac403",
+      "name": "Download Video1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        96,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "binaryData": true,
+        "binaryPropertyName": "videoData",
+        "name": "TikTok",
+        "parents": {
+          "__rl": true,
+          "value": "={{ $env.GDRIVE_OUT_FOLDER_ID }}",
+          "mode": "list",
+          "cachedResultName": "Output Folder"
+        },
+        "options": {}
+      },
+      "id": "694e77d8-3fdb-4651-ac2d-857cee5bbf5f",
+      "name": "Upload Video1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -320
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "1589175537",
+        "binaryData": true,
+        "binaryPropertyName": "videoData",
+        "additionalFields": {
+          "caption": "=Here is your generated video for <b>{{ $('Download Image1').item.json.name }}</b>. Reply “approve” or “regen”."
+        }
+      },
+      "id": "20098230-30a7-49db-ab48-f16a2a771cba",
+      "name": "Send Final Video1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -320
+      ],
+      "webhookId": "c6d63b38-b2d8-48f8-a31c-1901f27c51a2",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Ask For Prompt": [
+      {
+        "json": {
+          "data": {
+            "text": "A couple holding hands as the sun sets, vintage horror, dramatic lighting, closer to hands then zoom out to wide shot"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Send Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Image": {
+      "main": [
+        [
+          {
+            "node": "Ask For Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask For Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Poll Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Operation": {
+      "main": [
+        [
+          {
+            "node": "IF Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Done?": {
+      "main": [
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Poll Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video": {
+      "main": [
+        [
+          {
+            "node": "Upload Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video": {
+      "main": [
+        [
+          {
+            "node": "Send Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Download Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image1": {
+      "main": [
+        [
+          {
+            "node": "Send Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Image1": {
+      "main": [
+        [
+          {
+            "node": "Ask For Prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask For Prompt1": {
+      "main": [
+        [
+          {
+            "node": "Generate Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video1": {
+      "main": [
+        [
+          {
+            "node": "Poll Operation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Operation1": {
+      "main": [
+        [
+          {
+            "node": "IF Done?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Done?1": {
+      "main": [
+        [
+          {
+            "node": "Download Video1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 10s1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s1": {
+      "main": [
+        [
+          {
+            "node": "Poll Operation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video1": {
+      "main": [
+        [
+          {
+            "node": "Upload Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video1": {
+      "main": [
+        [
+          {
+            "node": "Send Final Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "53fd3f34-ae7e-4b05-aed5-38baa7f0964c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4fe693deebde92f2a98b0a1d3273bd6faedd2d73afaf56944706a9a11a5eaa0a"
+  },
+  "id": "Z3QbHDxRQZHwvgJO",
+  "tags": []
+}
