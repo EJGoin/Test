@@ -1,0 +1,1492 @@
+{
+  "name": "Job Scraper - not working",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -4672,
+        -224
+      ],
+      "name": "Schedule Trigger",
+      "id": "f61eace1-aa65-4be3-b3af-dcbeeb9db42b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "AUTO_SEND",
+              "value": "false",
+              "type": "boolean",
+              "id": "0631aa55-744c-464e-ab6c-a0cbaa409269"
+            },
+            {
+              "name": "RECENCY_MINUTES",
+              "value": 10080,
+              "type": "number",
+              "id": "c9a45c5d-3ea0-475c-8428-64fdf677d6fc"
+            },
+            {
+              "name": "MIN_SCORE",
+              "value": 60,
+              "type": "number",
+              "id": "6726586f-0c34-4d73-9dcf-834cc28c752d"
+            },
+            {
+              "name": "MIN_SALARY",
+              "value": 175000,
+              "type": "number",
+              "id": "d9d06db2-2f35-45fb-9981-fdb46b89c820"
+            },
+            {
+              "name": "REMOTE_ONLY",
+              "value": true,
+              "type": "boolean",
+              "id": "1a4dc3e0-2a46-4f15-bf2f-e2916b6cfce9"
+            },
+            {
+              "name": "US_ONLY",
+              "value": true,
+              "type": "boolean",
+              "id": "96279435-d43d-4d6b-9a30-51298e8b1243"
+            },
+            {
+              "name": "TITLE_REGEX",
+              "value": "(?=.*\\bcustomer\\s*success\\b)(?=.*\\b(head|director|vp|vice\\s*president|senior\\s*director)\\b)",
+              "type": "string",
+              "id": "25db7aab-c2d9-49a8-b1e2-1d7e5ae61965"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4464,
+        -64
+      ],
+      "name": "Settings",
+      "id": "4546688b-b0ac-44d2-aee9-2cb99db02502"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1DH-TMQbKgALYu4OszuNRUdwRQHFQadk5",
+          "mode": "list",
+          "cachedResultName": "Erick Goin Resume (1).pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1DH-TMQbKgALYu4OszuNRUdwRQHFQadk5/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -4480,
+        -496
+      ],
+      "name": "Download resume",
+      "id": "82714303-1090-4b6d-b71e-3dba7478f53b",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Imbe23xoZupGh4g1",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -4256,
+        -496
+      ],
+      "name": "Extract resume",
+      "id": "854fa3a9-dfde-454e-9e11-ca29c021ecc5"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "mode": "list",
+          "cachedResultName": "Job Search 2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Filter",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4464,
+        -288
+      ],
+      "name": "Read Filter",
+      "id": "3f6a897e-d1e1-4e64-ab99-b560eca94591",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "utR7hULq02fZ9jUG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "targets",
+              "value": "=[\n  { platform: 'greenhouse', token: 'stripe', company: 'Stripe' },\n  { platform: 'greenhouse', token: 'datadog', company: 'Datadog' },\n  { platform: 'lever', token: 'lever', company: 'Lever' }\n]",
+              "type": "json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4240,
+        -224
+      ],
+      "name": "Targets default",
+      "id": "e0ce8562-f437-45c0-934d-82481c9d3add"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge defaults with Google Sheet Targets\nfunction safeItems(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch { return []; } }\nfunction toTarget(x){\n  const j = x && x.json ? x.json : x;\n  return { platform: String(j.platform||'').trim(), token: String(j.token||'').trim(), company: String(j.company||j.token||'').trim() };\n}\nconst defaults = Array.isArray($json.targets) ? $json.targets.map(toTarget) : [];\nconst sheets = safeItems('Read Targets').map(toTarget).filter(t => t.platform && t.token);\nconst all = [...defaults, ...sheets];\nconst seen = new Set(); const out = [];\nfor (const t of all){\n  const key = t.platform + ':' + t.token;\n  if (!seen.has(key) && t.platform && t.token){ seen.add(key); out.push({ json: t }); }\n}\nif (out.length === 0) out.push({ json: { platform: 'greenhouse', token: 'stripe', company: 'Stripe' } });\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4016,
+        -224
+      ],
+      "name": "Expand targets",
+      "id": "ee34c120-940f-4d84-b39c-809303434bdf"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.platform }}",
+              "rightValue": "greenhouse"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3776,
+        -416
+      ],
+      "name": "Is GH",
+      "id": "c0d48f71-1314-4347-9241-af1c6e3ad9f0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.platform }}",
+              "rightValue": "lever",
+              "id": "4c189256-72b8-435f-a8ee-f2756aa52b5a"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3776,
+        -224
+      ],
+      "name": "Is Lever",
+      "id": "df94ea4e-728d-43ab-97a8-dbb1bc04f2c9"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://boards-api.greenhouse.io/v1/boards/' + $json.token + '/jobs?content=true' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30
+        },
+        "method": "GET"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3536,
+        -432
+      ],
+      "name": "Fetch GH",
+      "id": "1027dbc4-6773-47e3-8482-10c66b5ab149",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nfunction parseSalaryFromText(s){\n  if (!s) return null;\n  s = String(s).replace(/,/g,'');\n  const rangePatterns = [\n    /\\$?\\s*(\\d{2,6})\\s*[-–]\\s*\\$?\\s*(\\d{2,6})\\s*(k|K)?/i,\n    /\\$?\\s*(\\d{2,3})\\s*(k|K)\\s*[-–]\\s*\\$?\\s*(\\d{2,3})\\s*(k|K)/i\n  ];\n  for (const rx of rangePatterns){\n    const m = rx.exec(s);\n    if (m){\n      let a = Number(m[1]), b = Number(m[2]);\n      const hasK = !!(m[3] || m[4]);\n      if (hasK){ if (a < 1000) a *= 1000; if (b < 1000) b *= 1000; }\n      const min = Math.min(a,b), max = Math.max(a,b);\n      return { min, max, midpoint: Math.round((min+max)/2) };\n    }\n  }\n  const singles = [/\\$\\s*(\\d{3,6})\\b/i, /\\b(\\d{3,6})\\s*USD\\b/i, /\\b(\\d{2,3})\\s*(k|K)\\b/];\n  for (const rx of singles){\n    const m = rx.exec(s);\n    if (m){\n      let v = Number(m[1]); if (m[2] && /k/i.test(m[2]) && v < 1000) v *= 1000;\n      return { min: v, max: v, midpoint: v };\n    }\n  }\n  return null;\n}\nfunction coerceInt(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }\nfunction looksRemote(loc, title, desc){\n  const hay = (loc||'') + ' ' + (title||'') + ' ' + (desc||'');\n  return /\\bremote\\b/i.test(hay) && !/\\bhybrid\\b/i.test(hay);\n}\nfunction isUS(loc, desc){\n  const hay = (loc||'') + ' ' + (desc||'');\n  return /(United\\s*States|USA|\\bUS\\b)/i.test(hay);\n}\n\n    const out = [];\n    for (const it of $input.all()){\n      const token = it.json?.request?.options?.url?.split('/boards/')[1]?.split('/')[0] || '';\n      const company = ($items('Expand targets').find(x => x.json.token === token)?.json.company) || token;\n      const jobs = Array.isArray(it.json?.jobs) ? it.json.jobs : [];\n      for (const j of jobs){\n        const title = j.title || '';\n        const loc = (j.location && j.location.name) || '';\n        const desc = String(j.content || '').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();\n        const comp = parseSalaryFromText(desc + ' ' + title);\n        const isRemote = looksRemote(loc, title, desc);\n        const inUS = isUS(loc, desc);\n        out.push({ json: {\n          title, company, location: loc, description: desc,\n          applyLink: j.absolute_url || j.url || '',\n          postedAt: j.updated_at || j.created_at || '',\n          source: 'greenhouse',\n          platformToken: token,\n          compMin: comp ? comp.min : null,\n          compMax: comp ? comp.max : null,\n          compMid: comp ? comp.midpoint : null,\n          isRemote, inUS\n        } });\n      }\n    }\n    return out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3360,
+        -432
+      ],
+      "name": "Map GH",
+      "id": "5f185a0b-1191-40e8-b53a-7eb576445534"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.lever.co/v0/postings/' + $json.token + '?mode=json&limit=100' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "mode",
+              "value": "json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30
+        },
+        "method": "GET"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3536,
+        -240
+      ],
+      "name": "Fetch Lever",
+      "id": "39ec5db6-1206-40d2-b7d7-6e22601b0456",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nfunction parseSalaryFromText(s){\n  if (!s) return null;\n  s = String(s).replace(/,/g,'');\n  const rangePatterns = [\n    /\\$?\\s*(\\d{2,6})\\s*[-–]\\s*\\$?\\s*(\\d{2,6})\\s*(k|K)?/i,\n    /\\$?\\s*(\\d{2,3})\\s*(k|K)\\s*[-–]\\s*\\$?\\s*(\\d{2,3})\\s*(k|K)/i\n  ];\n  for (const rx of rangePatterns){\n    const m = rx.exec(s);\n    if (m){\n      let a = Number(m[1]), b = Number(m[2]);\n      const hasK = !!(m[3] || m[4]);\n      if (hasK){ if (a < 1000) a *= 1000; if (b < 1000) b *= 1000; }\n      const min = Math.min(a,b), max = Math.max(a,b);\n      return { min, max, midpoint: Math.round((min+max)/2) };\n    }\n  }\n  const singles = [/\\$\\s*(\\d{3,6})\\b/i, /\\b(\\d{3,6})\\s*USD\\b/i, /\\b(\\d{2,3})\\s*(k|K)\\b/];\n  for (const rx of singles){\n    const m = rx.exec(s);\n    if (m){\n      let v = Number(m[1]); if (m[2] && /k/i.test(m[2]) && v < 1000) v *= 1000;\n      return { min: v, max: v, midpoint: v };\n    }\n  }\n  return null;\n}\nfunction coerceInt(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }\nfunction looksRemote(loc, title, desc){\n  const hay = (loc||'') + ' ' + (title||'') + ' ' + (desc||'');\n  return /\\bremote\\b/i.test(hay) && !/\\bhybrid\\b/i.test(hay);\n}\nfunction isUS(loc, desc){\n  const hay = (loc||'') + ' ' + (desc||'');\n  return /(United\\s*States|USA|\\bUS\\b)/i.test(hay);\n}\n\n    const out = [];\n    for (const it of $input.all()){\n      const token = it.json?.request?.options?.url?.split('/postings/')[1]?.split('?')[0] || '';\n      const company = ($items('Expand targets').find(x => x.json.token === token)?.json.company) || token;\n      const arr = Array.isArray(it.json) ? it.json : [];\n      for (const j of arr){\n        const title = j.text || '';\n        const loc = (j.categories && j.categories.location) || '';\n        const desc = String(j.description || '').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();\n        const comp = parseSalaryFromText((j.additional && j.additional.compensation) ? JSON.stringify(j.additional.compensation) : desc + ' ' + title);\n        const isRemote = looksRemote(loc, title, desc);\n        const inUS = isUS(loc, desc);\n        const ts = Number(j.createdAt || Date.now());\n        out.push({ json: {\n          title, company, location: loc, description: desc,\n          applyLink: j.hostedUrl || j.applyUrl || '',\n          postedAt: new Date(ts).toISOString(),\n          source: 'lever',\n          platformToken: token,\n          compMin: comp ? comp.min : null,\n          compMax: comp ? comp.max : null,\n          compMid: comp ? comp.midpoint : null,\n          isRemote, inUS\n        } });\n      }\n    }\n    return out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3376,
+        -240
+      ],
+      "name": "Map Lever",
+      "id": "d5370457-8f9c-4324-b61e-0a8880cbdba3"
+    },
+    {
+      "parameters": {
+        "jsCode": "function take(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch { return []; } }\nconst names = ['Map GH','Map Lever','Map Ashby','Map Recruitee'];\nlet out = [];\nfor (const n of names){\n  const items = take(n);\n  if (items && items.length) out = out.concat(items);\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3200,
+        -192
+      ],
+      "name": "Combine Jobs",
+      "id": "f81c1e7e-5448-4154-96e0-c80eddbf10b3"
+    },
+    {
+      "parameters": {
+        "jsCode": "function safeItems(name){ try { return $items(name); } catch { return []; } }\nconst cfg = (() => { try { return safeItems('Settings')[0].json; } catch { return {}; } })() || {};\nconst minSalary = Number(cfg.MIN_SALARY || 175000);\nconst remoteOnly = !!cfg.REMOTE_ONLY;\nconst usOnly = !!cfg.US_ONLY;\nconst titleReStr = cfg.TITLE_REGEX || \"(?=.*customer\\s*success)(?=.*(head|director|vp|vice\\s*president|senior\\s*director))\";\nconst titleRe = new RegExp(titleReStr, \"i\");\nconst out = [];\nfor (const it of $input.all()){\n  const j = it.json || {};\n  const title = String(j.title || '');\n  const desc = String(j.description || '');\n  const loc  = String(j.location || '');\n  const isRemote = !!j.isRemote || /\\bremote\\b/i.test(title + ' ' + loc + ' ' + desc);\n  const inUS = !!j.inUS || /(United\\s*States|USA|\\bUS\\b)/i.test(loc + ' ' + desc);\n  const compMid = Number(j.compMid || 0), compMax = Number(j.compMax || 0), compMin = Number(j.compMin || 0);\n  const comp = compMid || compMax || compMin || 0;\n  if (!titleRe.test(title)) continue;\n  if (remoteOnly && !isRemote) continue;\n  if (usOnly && !inUS) continue;\n  if (!(comp && comp >= minSalary)) continue;\n  out.push(it);\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2992,
+        -192
+      ],
+      "name": "Filter Targeted",
+      "id": "ad60560d-b1c7-426a-bb95-819832747f66"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "mode": "list",
+          "cachedResultName": "Job Search 2025"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Seen",
+          "mode": "list",
+          "cachedResultName": "Seen"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -2784,
+        -192
+      ],
+      "name": "Seen read",
+      "id": "3d0871bf-9a35-4776-a354-ac01e90c957d",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "utR7hULq02fZ9jUG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nconst seenRows = _safeItems('Seen read').map(i => i.json).filter(r => r.link);\nconst seen = new Set(seenRows.map(r => String(r.link)));\nconst out = [];\nfor (const it of $input.all()) {\n  const link = String(it.json.applyLink || '');\n  if (!link || seen.has(link)) continue;\n  out.push(it);\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2592,
+        -192
+      ],
+      "name": "Filter new",
+      "id": "553da28c-914d-4758-b077-b786ad822833"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2400,
+        -32
+      ],
+      "name": "OpenAI Chat Model",
+      "id": "13322ceb-defa-484d-992f-36c90b17773d",
+      "credentials": {
+        "openAiApi": {
+          "id": "yltZ9iu9DyJEm5G0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the resume and job description, output strictly JSON: {\\\"score\\\": number, \\\"coverLetter\\\": string}\\njob_description: {{ $json.description }}\\nmy_resume: {{ $('Extract resume').item.json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -2400,
+        -192
+      ],
+      "name": "AI Agent",
+      "id": "ae54685f-5c94-49b7-8132-5c4f12af1a1c"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ ($json.output || '').replaceAll(/```(?:json)?/g,'').trim() }}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2128,
+        -192
+      ],
+      "name": "Parse AI Output",
+      "id": "cd695a62-5791-4858-b445-d93224caea1d"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              },
+              "leftValue": "={{ $json.score }}",
+              "rightValue": "={{ $items('Settings')[0].json.MIN_SCORE }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2000,
+        -192
+      ],
+      "name": "Score Gate",
+      "id": "707c105d-a00f-4e39-aa87-8cb004e7cdbe"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "mode": "list",
+          "cachedResultName": "Job Search 2025"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Result",
+          "mode": "list",
+          "cachedResultName": "Result"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "link": "={{ $json.applyLink }}",
+            "Company": "={{ $json.company }}",
+            "Title": "={{ $json.title }}",
+            "Location": "={{ $json.location }}",
+            "score": "={{ $json.score }}",
+            "description": "={{ $json.description }}",
+            "Cover Letter": "={{ $json.coverLetter }}",
+            "Posted At": "={{ $json.postedAt }}",
+            "Source": "={{ $json.source }}",
+            "compMin": "={{ $json.compMin }}",
+            "compMax": "={{ $json.compMax }}",
+            "compMid": "={{ $json.compMid }}"
+          },
+          "matchingColumns": [
+            "link"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -1792,
+        -96
+      ],
+      "name": "Append Result",
+      "id": "d02a521d-9137-4240-9047-0917b65651a9",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "utR7hULq02fZ9jUG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "mode": "list",
+          "cachedResultName": "Job Search 2025"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Seen",
+          "mode": "list",
+          "cachedResultName": "Seen"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "link": "={{ $json.applyLink }}",
+            "addedAt": "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -1792,
+        32
+      ],
+      "name": "Append Seen",
+      "id": "a44d7c5e-4be9-479c-bf74-0e8f9a95a38f",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "utR7hULq02fZ9jUG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_TELEGRAM_CHAT_ID",
+        "text": "=New match: {{ $json.title }} at {{ $json.company }}\\nScore: {{ $json.score }}\\nApply: {{ $json.applyLink }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1792,
+        144
+      ],
+      "name": "Telegram Alert",
+      "id": "65d9cbd3-87a4-4925-bf3b-8c23cedcb1d6",
+      "webhookId": "dd419e8b-ce2a-4dcc-9298-4697980d4f65",
+      "credentials": {
+        "telegramApi": {
+          "id": "QeY4JmTsXX12OCVJ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nconst site = ($json.company || '').toLowerCase().replace(/\\s+/g,'') + '.com';\nreturn [{ json: { company: $json.company, companyWebsite: site } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1792,
+        -192
+      ],
+      "name": "Prep Domain",
+      "id": "db8fb559-ff07-4954-bf3d-3f22a1c73b55"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://autocomplete.clearbit.com/v1/companies/suggest?query=' + encodeURIComponent($json.company) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1600,
+        -192
+      ],
+      "name": "Clearbit",
+      "id": "9d820f3b-bf27-4666-be37-b16ff9c480ec"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nconst arr = Array.isArray($json.body) ? $json.body : [];\nconst fromCB = arr[0]?.domain || '';\nconst fromSite = _safeItems('Prep Domain')[0]?.json?.companyWebsite || '';\nlet domain = fromCB || (fromSite.replace(/^https?:\\/\\//,'').split('/')[0]) || '';\ndomain = domain.replace(/^www\\./,'');\nreturn [{ json: { domain } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1392,
+        -192
+      ],
+      "name": "Pick Domain",
+      "id": "c68cfdbe-1c64-4524-b771-3b0b14da1fc9"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nconst d = ($json.domain || '').trim();\nif (!d) return [];\nconst roots = [`https://${d}`, `https://www.${d}`];\nconst paths = ['team','about','leadership','company','our-team','management'];\nconst urls = [];\nfor (const r of roots) for (const p of paths) urls.push({ json: { url: `${r}/${p}` } });\nreturn urls;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        -192
+      ],
+      "name": "Build Team URLs",
+      "id": "c295cb72-c705-4e3b-b003-f044fac5e8b2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "redirect": {},
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -992,
+        -192
+      ],
+      "name": "Fetch Team Page",
+      "id": "be9f5f21-3e67-4a24-b015-9ce4cb1d6746"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "names",
+              "cssSelector": "h2, h3, .team-member__name, .person-name, .employee-name",
+              "returnArray": true
+            },
+            {
+              "key": "titles",
+              "cssSelector": "p, .team-member__role, .person-title, .employee-title",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -800,
+        -192
+      ],
+      "name": "Extract People",
+      "id": "85ecc36b-78bd-45b4-9ae4-de8f99d86c39"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nfunction guess(first, last, domain){\n  first = first.toLowerCase(); last = last.toLowerCase();\n  return `${first}.${last}@${domain}`;\n}\nconst domain = _safeItems('Pick Domain')[0]?.json?.domain || '';\nconst names = ($json.names || []).map(s => String(s).trim()).filter(Boolean);\nconst titles = ($json.titles || []).map(s => String(s).trim()).filter(Boolean);\nconst text = (names.join(' ') + ' ' + titles.join(' ')).toLowerCase();\nconst want = /(head|director|vp|vice president|chief).*customer.*success|customer.*success.*(head|director|vp|chief)/i;\nlet best = null;\nfor (const n of names){\n  const clean = n.replace(/[^a-zA-Z\\s'-]/g,'').trim();\n  const parts = clean.split(/\\s+/);\n  if (parts.length < 2) continue;\n  const [first, ...rest] = parts;\n  const last = rest.pop();\n  if (want.test(text)){\n    const email = domain ? guess(first, last, domain) : '';\n    best = { name: `${first} ${last}`, email };\n    break;\n  }\n}\nreturn [{ json: { bestContact: best ? `${best.name}${best.email ? ' <'+best.email+'>' : ''}` : '' } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        -192
+      ],
+      "name": "Pick Contact",
+      "id": "3916ee09-cb00-44e9-9ea5-9bd0525315a2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "bestContact",
+              "value": "={{ $json.bestContact }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        -192
+      ],
+      "name": "Attach Contact",
+      "id": "e246f9dc-f30d-4f48-b238-54e181045e56"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "boolean",
+                "operation": "isTrue"
+              },
+              "leftValue": "={{ $items('Settings')[0].json.AUTO_SEND }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -192,
+        -192
+      ],
+      "name": "Auto Send Gate",
+      "id": "068813fb-32a6-4507-a449-d163d690ef99"
+    },
+    {
+      "parameters": {
+        "sendTo": "erick.j.goin@gmail.com",
+        "subject": "={{ $json.title + ' at ' + $json.company + ' , quick fit and value add' }}",
+        "message": "Test",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -112
+      ],
+      "name": "Gmail Send",
+      "id": "5a9598cb-f100-439c-a26f-0711280f2791",
+      "webhookId": "6e55072e-3576-4f0f-9a7c-0a86ae230996",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Cmh4KjUGMJZy3Nko",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.platform }}",
+              "rightValue": "ashby"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3776,
+        -80
+      ],
+      "name": "Is Ashby",
+      "id": "8d812e20-594b-4291-a72d-49c7a402794b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.platform }}",
+              "rightValue": "recruitee"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3776,
+        80
+      ],
+      "name": "Is Recruitee",
+      "id": "ea42017a-c37b-4dfe-81fb-8afe33e88bda"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.ashbyhq.com/posting-api/job-board/' + encodeURIComponent($json.token) + '?includeCompensation=true' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "timeout": 30
+        },
+        "method": "GET"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3536,
+        -80
+      ],
+      "name": "Fetch Ashby",
+      "id": "b265c3c6-4aa7-45df-a56a-4e87bf60d7d5",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nfunction parseSalaryFromText(s){\n  if (!s) return null;\n  s = String(s).replace(/,/g,'');\n  const rangePatterns = [\n    /\\$?\\s*(\\d{2,6})\\s*[-–]\\s*\\$?\\s*(\\d{2,6})\\s*(k|K)?/i,\n    /\\$?\\s*(\\d{2,3})\\s*(k|K)\\s*[-–]\\s*\\$?\\s*(\\d{2,3})\\s*(k|K)/i\n  ];\n  for (const rx of rangePatterns){\n    const m = rx.exec(s);\n    if (m){\n      let a = Number(m[1]), b = Number(m[2]);\n      const hasK = !!(m[3] || m[4]);\n      if (hasK){ if (a < 1000) a *= 1000; if (b < 1000) b *= 1000; }\n      const min = Math.min(a,b), max = Math.max(a,b);\n      return { min, max, midpoint: Math.round((min+max)/2) };\n    }\n  }\n  const singles = [/\\$\\s*(\\d{3,6})\\b/i, /\\b(\\d{3,6})\\s*USD\\b/i, /\\b(\\d{2,3})\\s*(k|K)\\b/];\n  for (const rx of singles){\n    const m = rx.exec(s);\n    if (m){\n      let v = Number(m[1]); if (m[2] && /k/i.test(m[2]) && v < 1000) v *= 1000;\n      return { min: v, max: v, midpoint: v };\n    }\n  }\n  return null;\n}\nfunction coerceInt(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }\nfunction looksRemote(loc, title, desc){\n  const hay = (loc||'') + ' ' + (title||'') + ' ' + (desc||'');\n  return /\\bremote\\b/i.test(hay) && !/\\bhybrid\\b/i.test(hay);\n}\nfunction isUS(loc, desc){\n  const hay = (loc||'') + ' ' + (desc||'');\n  return /(United\\s*States|USA|\\bUS\\b)/i.test(hay);\n}\n\n    function pickSalaryFromComp(comp){\n      if (!comp) return null;\n      try {\n        const tiers = comp.compensationTiers || [];\n        let min = null, max = null;\n        for (const t of tiers){\n          for (const c of (t.components || [])){\n            if (c.compensationType === 'Salary' && (c.currencyCode||'').toUpperCase() === 'USD'){\n              const a = coerceInt(c.minValue); const b = coerceInt(c.maxValue);\n              if (a != null) min = (min==null) ? a : Math.min(min, a);\n              if (b != null) max = (max==null) ? b : Math.max(max, b);\n            }\n          }\n        }\n        if (min!=null || max!=null){\n          const lo = min ?? max ?? null;\n          const hi = max ?? min ?? null;\n          const mid = (lo!=null && hi!=null) ? Math.round((lo+hi)/2) : (lo ?? hi);\n          return { min: lo, max: hi, midpoint: mid };\n        }\n      } catch(e){}\n      return null;\n    }\n    const out = [];\n    for (const it of $input.all()){\n      const token = it.json?.request?.options?.url?.split('/job-board/')[1]?.split('?')[0] || $json.token || '';\n      const company = ($items('Expand targets').find(x => x.json.token === token)?.json.company) || token;\n      const root = it.json || {};\n      const jobs = Array.isArray(root.jobs) ? root.jobs : [];\n      const compRoot = root.compensation || null;\n      for (const j of jobs){\n        const title = j.title || '';\n        const loc = j.location || '';\n        const desc = String(j.descriptionHtml || '').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();\n        const comp = pickSalaryFromComp(compRoot) || parseSalaryFromText(desc + ' ' + title);\n        const isRemote = !!j.isRemote || looksRemote(loc, title, desc);\n        const inUS = isUS(loc, desc);\n        out.push({ json: {\n          title, company, location: loc, description: desc,\n          applyLink: j.applyUrl || j.jobUrl || '',\n          postedAt: j.publishedAt || '',\n          source: 'ashby',\n          platformToken: token,\n          compMin: comp ? comp.min : null,\n          compMax: comp ? comp.max : null,\n          compMid: comp ? comp.midpoint : null,\n          isRemote, inUS\n        } });\n      }\n    }\n    return out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3376,
+        -80
+      ],
+      "name": "Map Ashby",
+      "id": "6f3ef6a4-23d3-44e8-954d-ba69e0356fc0"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://' + $json.token + '.recruitee.com/api/offers/' }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "timeout": 30
+        },
+        "method": "GET"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3536,
+        80
+      ],
+      "name": "Fetch Recruitee",
+      "id": "d7d7d3a3-fbc3-42ac-9f21-ed853c4b87c8",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nfunction parseSalaryFromText(s){\n  if (!s) return null;\n  s = String(s).replace(/,/g,'');\n  const rangePatterns = [\n    /\\$?\\s*(\\d{2,6})\\s*[-–]\\s*\\$?\\s*(\\d{2,6})\\s*(k|K)?/i,\n    /\\$?\\s*(\\d{2,3})\\s*(k|K)\\s*[-–]\\s*\\$?\\s*(\\d{2,3})\\s*(k|K)/i\n  ];\n  for (const rx of rangePatterns){\n    const m = rx.exec(s);\n    if (m){\n      let a = Number(m[1]), b = Number(m[2]);\n      const hasK = !!(m[3] || m[4]);\n      if (hasK){ if (a < 1000) a *= 1000; if (b < 1000) b *= 1000; }\n      const min = Math.min(a,b), max = Math.max(a,b);\n      return { min, max, midpoint: Math.round((min+max)/2) };\n    }\n  }\n  const singles = [/\\$\\s*(\\d{3,6})\\b/i, /\\b(\\d{3,6})\\s*USD\\b/i, /\\b(\\d{2,3})\\s*(k|K)\\b/];\n  for (const rx of singles){\n    const m = rx.exec(s);\n    if (m){\n      let v = Number(m[1]); if (m[2] && /k/i.test(m[2]) && v < 1000) v *= 1000;\n      return { min: v, max: v, midpoint: v };\n    }\n  }\n  return null;\n}\nfunction coerceInt(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }\nfunction looksRemote(loc, title, desc){\n  const hay = (loc||'') + ' ' + (title||'') + ' ' + (desc||'');\n  return /\\bremote\\b/i.test(hay) && !/\\bhybrid\\b/i.test(hay);\n}\nfunction isUS(loc, desc){\n  const hay = (loc||'') + ' ' + (desc||'');\n  return /(United\\s*States|USA|\\bUS\\b)/i.test(hay);\n}\n\n    const out = [];\n    for (const it of $input.all()){\n      // URL looks like https://<token>.recruitee.com/api/offers/\n      const u = String(it.json?.request?.options?.url || '');\n      const token = (u.split('https://')[1]||'').split('.recruitee.com')[0] || $json.token || '';\n      const company = ($items('Expand targets').find(x => x.json.token === token)?.json.company) || token;\n      const arr = Array.isArray(it.json?.offers) ? it.json.offers : [];\n      for (const j of arr){\n        const title = j.title || '';\n        // Locations can be in j.cities[], j.locations or j.location\n        let locs = '';\n        if (Array.isArray(j.cities) && j.cities.length) locs = j.cities.map(c => c.city || '').filter(Boolean).join(', ');\n        else if (Array.isArray(j.locations) && j.locations.length) locs = j.locations.map(l => l.city || l.country || '').filter(Boolean).join(', ');\n        else locs = j.location || '';\n        const desc = String(j.description || '').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim();\n        const isRemote = looksRemote((j.workplace_type||'') + ' ' + locs, title, desc);\n        const inUS = isUS(locs, desc);\n        const comp = parseSalaryFromText(desc + ' ' + title);\n        out.push({ json: {\n          title, company, location: locs, description: desc,\n          applyLink: j.careers_url || j.url || '',\n          postedAt: j.updated_at || j.created_at || '',\n          source: 'recruitee',\n          platformToken: token,\n          compMin: comp ? comp.min : null,\n          compMax: comp ? comp.max : null,\n          compMid: comp ? comp.midpoint : null,\n          isRemote, inUS\n        } });\n      }\n    }\n    return out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3376,
+        80
+      ],
+      "name": "Map Recruitee",
+      "id": "7d522e07-ae33-473f-bc0e-b26351e65740"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "receivedAfter": "2025-08-20T00:00:00",
+          "sender": "jobs-noreply@linkedin.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -3936,
+        240
+      ],
+      "name": "Gmail Alerts",
+      "id": "5251ba5e-b32d-47f2-ac1e-e481e3f94ffd",
+      "webhookId": "613811ce-a978-4cb0-a525-5683b4c2eed2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Cmh4KjUGMJZy3Nko",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\n// Walk Gmail message payload to find HTML, decode base64url\nfunction b64urlDecode(data){\n  if (!data) return '';\n  data = data.replace(/-/g, '+').replace(/_/g, '/');\n  const pad = data.length % 4;\n  if (pad) data += '='.repeat(4 - pad);\n  try { return Buffer.from(data, 'base64').toString('utf8'); } catch { return ''; }\n}\nfunction findHtml(part){\n  if (!part) return null;\n  if (part.mimeType === 'text/html' && part.body && (part.body.data || part.body.attachmentId === undefined)) return part.body.data || '';\n  if (Array.isArray(part.parts)){\n    for (const p of part.parts){\n      const hit = findHtml(p);\n      if (hit) return hit;\n    }\n  }\n  return null;\n}\nconst out = [];\nfor (const it of $input.all()){\n  const m = it.json;\n  const payload = m.payload || m.message?.payload || null;\n  const subject = (m.payload?.headers || []).concat(m.message?.payload?.headers || []).find(h => h.name === 'Subject')?.value || m.subject || '';\n  const from = (m.payload?.headers || []).concat(m.message?.payload?.headers || []).find(h => h.name === 'From')?.value || m.from || '';\n  let htmlB64 = findHtml(payload);\n  let html = b64urlDecode(htmlB64 || '');\n  if (!html && m.body && m.body.html) html = String(m.body.html); // simplified mode fallback\n  if (!html && m.snippet) html = m.snippet;\n  if (!html) continue;\n  out.push({ json: { subject, from, html } });\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3776,
+        240
+      ],
+      "name": "Parse Gmail HTML",
+      "id": "b3187fb1-0729-4ac1-8f7c-2e1cd171fef0"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nfunction uniq(arr){ return Array.from(new Set(arr)); }\nfunction getLinks(html){\n  const hrefs = [];\n  const re = /<a\\s+[^>]*href=[\"']([^\"']+)[\"'][^>]*>(.*?)<\\/a>/gi;\n  let m;\n  while ((m = re.exec(html))){\n    hrefs.push({ href: m[1], text: m[2].replace(/<[^>]+>/g,' ').trim() });\n  }\n  return hrefs;\n}\nfunction decodeLinkedInSafety(url){\n  try{\n    const u = new URL(url);\n    if ((u.hostname.endsWith('linkedin.com') || u.hostname.endsWith('lnkd.in')) && u.searchParams.has('url')){\n      return decodeURIComponent(u.searchParams.get('url'));\n    }\n  }catch {}\n  return url;\n}\nfunction clean(u){\n  try{\n    let s = decodeLinkedInSafety(u);\n    const url = new URL(s);\n    // strip tracking\n    url.searchParams.delete('utm_source'); url.searchParams.delete('utm_medium'); url.searchParams.delete('utm_campaign'); url.searchParams.delete('trk'); url.searchParams.delete('refId');\n    return url.toString();\n  }catch { return u; }\n}\nconst allow = [\n  /linkedin\\.com\\/jobs\\/view/i,\n  /indeed\\.[a-z.]+\\/viewjob/i,\n  /boards\\.greenhouse\\.io\\//i,\n  /lever\\.co\\//i,\n  /jobs\\.ashbyhq\\.com\\//i,\n  /recruitee\\.com\\//i,\n  /workable\\.com\\//i,\n  /smartrecruiters\\.com\\//i,\n  /myworkdayjobs\\.com\\//i\n];\nconst out = [];\nfor (const it of $input.all()){\n  const subject = it.json.subject || '';\n  const html = it.json.html || '';\n  const pairs = getLinks(html).map(p => ({ href: clean(p.href), text: p.text }));\n  const filtered = uniq(pairs\n    .filter(p => allow.some(rx => rx.test(p.href)))\n    .map(p => JSON.stringify(p)));\n  for (const s of filtered){\n    const p = JSON.parse(s);\n    out.push({ json: { source: 'gmail', subject, applyLink: p.href, title: p.text } });\n  }\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3536,
+        240
+      ],
+      "name": "Extract Email Links",
+      "id": "4335cb01-28e1-4db1-8dc7-b2a4bbfab820"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Global safe helpers for this node\nfunction _itemsName(name){ try { const a = $items(name); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _itemsIdx(i){ try { const a = $items(i); return Array.isArray(a) ? a : []; } catch (e) { return []; } }\nfunction _firstJsonName(name){ const a = _itemsName(name); return (a.length && a[0] && a[0].json) ? a[0].json : {}; }\n\n// Safe helpers, avoid ExpressionError when a referenced node did not execute\nfunction _safeItems(name){\n  try { return $items(name); } catch (e) { return []; }\n}\nfunction _safeFirstJson(name){\n  const arr = _safeItems(name);\n  return Array.isArray(arr) && arr.length ? (arr[0].json || {}) : {};\n}\n\nconst nowIso = new Date().toISOString();\nreturn $input.all().map(i => ({\n  json: {\n    title: i.json.title || '',\n    company: '',\n    location: '',\n    description: '',\n    applyLink: i.json.applyLink || '',\n    postedAt: nowIso,\n    source: i.json.applyLink.includes('linkedin.com') ? 'linkedin' : (i.json.applyLink.includes('indeed.') ? 'indeed' : 'email'),\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3376,
+        240
+      ],
+      "name": "Normalize Email Items",
+      "id": "0e79a5bd-652c-4445-8afa-c47fc0f338d6"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "mode": "list",
+          "cachedResultName": "Job Search 2025"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Targets",
+          "mode": "list",
+          "cachedResultName": "Targets"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4384,
+        -64
+      ],
+      "name": "Read Targets",
+      "id": "4afb001d-b220-4644-b48f-4e694230922a",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "utR7hULq02fZ9jUG",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download resume",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Filter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Targets default",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail Alerts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Targets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download resume": {
+      "main": [
+        [
+          {
+            "node": "Extract resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Targets default": {
+      "main": [
+        [
+          {
+            "node": "Expand targets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand targets": {
+      "main": [
+        [
+          {
+            "node": "Is GH",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Lever",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Ashby",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Recruitee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is GH": {
+      "main": [
+        [
+          {
+            "node": "Fetch GH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Lever": {
+      "main": [
+        [
+          {
+            "node": "Fetch Lever",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch GH": {
+      "main": [
+        [
+          {
+            "node": "Map GH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Lever": {
+      "main": [
+        [
+          {
+            "node": "Map Lever",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map GH": {
+      "main": [
+        [
+          {
+            "node": "Combine Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Jobs": {
+      "main": [
+        [
+          {
+            "node": "Filter Targeted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Targeted": {
+      "main": [
+        [
+          {
+            "node": "Seen read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seen read": {
+      "main": [
+        [
+          {
+            "node": "Filter new",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter new": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Score Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Gate": {
+      "main": [
+        [
+          {
+            "node": "Append Result",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append Seen",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prep Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep Domain": {
+      "main": [
+        [
+          {
+            "node": "Clearbit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clearbit": {
+      "main": [
+        [
+          {
+            "node": "Pick Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Domain": {
+      "main": [
+        [
+          {
+            "node": "Build Team URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Team URLs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Team Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Team Page": {
+      "main": [
+        [
+          {
+            "node": "Extract People",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract People": {
+      "main": [
+        [
+          {
+            "node": "Pick Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Contact": {
+      "main": [
+        [
+          {
+            "node": "Attach Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Contact": {
+      "main": [
+        [
+          {
+            "node": "Auto Send Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Send Gate": {
+      "main": [
+        [
+          {
+            "node": "Gmail Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Ashby": {
+      "main": [
+        [
+          {
+            "node": "Fetch Ashby",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Recruitee": {
+      "main": [
+        [
+          {
+            "node": "Fetch Recruitee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Ashby": {
+      "main": [
+        [
+          {
+            "node": "Map Ashby",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Recruitee": {
+      "main": [
+        [
+          {
+            "node": "Map Recruitee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Alerts": {
+      "main": [
+        [
+          {
+            "node": "Parse Gmail HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Gmail HTML": {
+      "main": [
+        [
+          {
+            "node": "Extract Email Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email Links": {
+      "main": [
+        [
+          {
+            "node": "Normalize Email Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Lever": {
+      "main": [
+        [
+          {
+            "node": "Combine Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Ashby": {
+      "main": [
+        [
+          {
+            "node": "Combine Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Recruitee": {
+      "main": [
+        [
+          {
+            "node": "Combine Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email Items": {
+      "main": [
+        [
+          {
+            "node": "Combine Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b98b8ac5-fdb2-4d2f-87c3-748ae679ee41",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4fe693deebde92f2a98b0a1d3273bd6faedd2d73afaf56944706a9a11a5eaa0a"
+  },
+  "id": "KIBcxDVZX7yYG3pX",
+  "tags": []
+}
