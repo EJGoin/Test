@@ -1,0 +1,654 @@
+[
+  {
+    "name": "Job Search Master",
+    "active": false,
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Cron",
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "mode": "everyX",
+                "every": 1,
+                "unit": "days"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "2",
+        "name": "Get Config",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2,
+        "position": [
+          250,
+          0
+        ],
+        "parameters": {
+          "operation": "read",
+          "sheetId": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "range": "Config!A:D",
+          "valueRenderMode": "UNFORMATTED_VALUE",
+          "returnAll": true
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "",
+            "name": "Google Sheets OAuth2"
+          }
+        }
+      },
+      {
+        "id": "3",
+        "name": "Config to Object",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          500,
+          0
+        ],
+        "parameters": {
+          "functionCode": "// Convert Config sheet rows to an object keyed by 'key'.\nconst cfg = {};\nfor (const item of items) {\n  const row = item.json;\n  const key = String(row[0] || '').trim();\n  const value = row[1];\n  const type = String(row[2] || 'string').toLowerCase();\n  let val = value;\n  if (type === 'number') val = Number(value);\n  else if (type === 'boolean') val = (String(value).toLowerCase() === 'true');\n  else if (type === 'array' || type === 'csv') {\n    if (Array.isArray(value)) val = value;\n    else val = String(value || '').split(',').map(v => v.trim()).filter(Boolean);\n  }\n  else val = String(value);\n  if (key) cfg[key] = val;\n}\nreturn [ { json: { config: cfg } } ];"
+        }
+      },
+      {
+        "id": "4",
+        "name": "Get JobSources",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2,
+        "position": [
+          750,
+          0
+        ],
+        "parameters": {
+          "operation": "read",
+          "sheetId": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "range": "JobSources!A:G",
+          "valueRenderMode": "UNFORMATTED_VALUE",
+          "returnAll": true
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "",
+            "name": "Google Sheets OAuth2"
+          }
+        }
+      },
+      {
+        "id": "5",
+        "name": "Prepare Plan",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          0
+        ],
+        "parameters": {
+          "functionCode": "// Combine config and job sources into items.\nconst config = $items('Config to Object')[0].json.config;\nconst rows = items;\nconst out = [];\n// Skip header row (assume first row contains column names)\nfor (let i = 1; i < rows.length; i++) {\n  const row = rows[i].json;\n  const jobSource = {\n    platform: row[0],\n    token: row[1],\n    company: row[2],\n    active: String(row[3]).toLowerCase() === 'true',\n    priority: Number(row[4] || 0),\n    baseUrl: row[5],\n    allowedRoles: row[6]\n  };\n  if (!jobSource.active) continue;\n  out.push({ json: { config, jobSource } });\n}\nreturn out;"
+        }
+      },
+      {
+        "id": "6",
+        "name": "Call Fetcher Agent",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          1250,
+          0
+        ],
+        "parameters": {
+          "workflowId": "Fetcher Agent",
+          "options": {
+            "waitForCompletion": true,
+            "responseData": "allData"
+          }
+        }
+      },
+      {
+        "id": "7",
+        "name": "Call Parser Agent",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          1500,
+          0
+        ],
+        "parameters": {
+          "workflowId": "Parser Agent",
+          "options": {
+            "waitForCompletion": true,
+            "responseData": "allData"
+          }
+        }
+      },
+      {
+        "id": "8",
+        "name": "Call Filter Agent",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          1750,
+          0
+        ],
+        "parameters": {
+          "workflowId": "Filter & Scoring Agent",
+          "options": {
+            "waitForCompletion": true,
+            "responseData": "allData"
+          }
+        }
+      },
+      {
+        "id": "9",
+        "name": "Call Notification Agent",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          2000,
+          0
+        ],
+        "parameters": {
+          "workflowId": "Notification Agent",
+          "options": {
+            "waitForCompletion": true,
+            "responseData": "allData"
+          }
+        }
+      },
+      {
+        "id": "10",
+        "name": "Call Analytics Agent",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          2250,
+          0
+        ],
+        "parameters": {
+          "workflowId": "Analytics Agent",
+          "options": {
+            "waitForCompletion": true,
+            "responseData": "allData"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Cron": {
+        "main": [
+          [
+            {
+              "node": "Get Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Config": {
+        "main": [
+          [
+            {
+              "node": "Config to Object",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Config to Object": {
+        "main": [
+          [
+            {
+              "node": "Get JobSources",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get JobSources": {
+        "main": [
+          [
+            {
+              "node": "Prepare Plan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Plan": {
+        "main": [
+          [
+            {
+              "node": "Call Fetcher Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Fetcher Agent": {
+        "main": [
+          [
+            {
+              "node": "Call Parser Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Parser Agent": {
+        "main": [
+          [
+            {
+              "node": "Call Filter Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Filter Agent": {
+        "main": [
+          [
+            {
+              "node": "Call Notification Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Notification Agent": {
+        "main": [
+          [
+            {
+              "node": "Call Analytics Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {}
+  },
+  {
+    "name": "Fetcher Agent",
+    "active": false,
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Start",
+        "type": "n8n-nodes-base.start",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Fetcher Code",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          300,
+          200
+        ],
+        "parameters": {
+          "functionCode": "/*\n * Fetch jobs from ATS sources defined in the input items.\n * Input items should have { config, jobSource } in json.\n * Returns a list of job objects with normalized fields.\n */\nasync function fetchJobsForSource(jobSource) {\n  const source = jobSource.platform ? jobSource.platform.toLowerCase() : '';\n  const token = jobSource.token;\n  let jobs = [];\n  try {\n    if (source === 'greenhouse') {\n      const url = `https://boards-api.greenhouse.io/v1/boards/${token}/jobs?content=true`;\n      const response = await this.helpers.httpRequest({\n        method: 'GET',\n        url\n      });\n      jobs = response.jobs || [];\n    } else if (source === 'lever') {\n      const url = `https://api.lever.co/v0/postings/${token}?mode=json`;\n      const response = await this.helpers.httpRequest({\n        method: 'GET',\n        url\n      });\n      jobs = response || [];\n    } else if (source === 'ashby') {\n      const url = `https://api.ashbyhq.com/posting-api/job-board/${token}`;\n      const response = await this.helpers.httpRequest({\n        method: 'GET',\n        url\n      });\n      jobs = response.jobs || response || [];\n    } else if (source === 'recruitee') {\n      const url = `https://api.recruitee.com/careers/${jobSource.company}`;\n      const response = await this.helpers.httpRequest({\n        method: 'GET',\n        url,\n        headers: {\n          Authorization: `Bearer ${token}`\n        }\n      });\n      jobs = response.jobs || response || [];\n    }\n  } catch (e) {\n    jobs = [];\n  }\n  return jobs.map(job => ({ source: source, raw: job }));\n}\nfunction toISO(value) {\n  try { return new Date(value).toISOString(); } catch (e) { return null; }\n}\nfunction b64(s) { return Buffer.from(String(s)).toString('base64').slice(0, 22); }\nconst output = [];\nfor (const item of items) {\n  const jobSource = item.json.jobSource;\n  const jobs = await fetchJobsForSource(jobSource);\n  for (const entry of jobs) {\n    const job = entry.raw;\n    const title = job.title || job.text || job.name || '';\n    const company = job.company || jobSource.company || '';\n    const url = job.absolute_url || job.applyUrl || job.url || job.hostedUrl || '';\n    const location = (job.location && (job.location.name || job.location)) || (job.offices && job.offices.map(o => o.name).join(', ')) || '';\n    const postedAt = toISO(job.updated_at || job.created_at || job.createdAt || job.posted_at || job.createdDate);\n    const descriptionRaw = job.content || job.description || job.details || '';\n    const id = job.id || job._id || b64(`${company}|${title}|${url}`);\n    const hash = b64(`${company}|${title}|${url}`);\n    output.push({ json: {\n      source: entry.source,\n      id,\n      hash,\n      title,\n      company,\n      location,\n      url,\n      postedAt,\n      descriptionRaw,\n      config: item.json.config\n    } });\n  }\n}\nreturn output;"
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Fetcher Code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {}
+  },
+  {
+    "name": "Parser Agent",
+    "active": false,
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Start",
+        "type": "n8n-nodes-base.start",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Parser Code",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          300,
+          200
+        ],
+        "parameters": {
+          "functionCode": "// Clean job descriptions, extract salary, remote and US flags\nfunction stripHtml(html) { return String(html || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(); }\nconst US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];\nfunction isUS(loc, text) { const s = `${loc} ${text}`.toLowerCase(); if (s.includes('united states') || /\busa\b|\bus\b/.test(s)) return true; return US_STATES.some(ab => new RegExp(`\\b${ab}\\b`).test(loc)); }\nfunction isRemote(loc, text) { const s = `${loc} ${text}`.toLowerCase(); return /(remote|work from home|anywhere in the u\\.s\\.|u\\.s\\. remote|distributed)/.test(s); }\nfunction parseCompensation(text) { const s = String(text).replace(/[\u00a0\\s]/g,' '); let min=null,max=null,curr='USD'; let m = s.match(/\\$?\\s*([\\d]{2,3}(?:,\\d{3})?)(?:\\s*[-to]+\\s*\\$?\\s*([\\d]{2,3}(?:,\\d{3})?))\\s*(k|K)?\\s*(?:per\\s*year|annual|yr|year)?/); if (m) { const a = Number(m[1].replace(/,/g,'')); const b = m[2] ? Number(m[2].replace(/,/g,'')) : null; const mult = m[3] ? 1000 : 1; min = a*mult; max = b? b*mult : null; } else { const h = s.match(/(\\d{2,3})\\s*[kK]\\s*(?:[-to]+\\s*(\\d{2,3})\\s*[kK])?/); if (h) { min = Number(h[1])*1000; max = h[2] ? Number(h[2])*1000 : null; } } return { compMin:min, compMax:max, currency:curr }; }\nreturn items.map(item => { const text = stripHtml(item.json.descriptionRaw); const comp = parseCompensation(text); const loc = item.json.location || ''; const remoteFlag = isRemote(loc, text); const isUSFlag = isUS(loc, text); return { json: { ...item.json, description: text, remoteFlag, isUS: isUSFlag, compMin: comp.compMin, compMax: comp.compMax, currency: comp.currency } }; });"
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Parser Code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {}
+  },
+  {
+    "name": "Filter & Scoring Agent",
+    "active": false,
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Start",
+        "type": "n8n-nodes-base.start",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Filter & Score Code",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          300,
+          200
+        ],
+        "parameters": {
+          "functionCode": "// Apply filtering and simple scoring based on config.\nconst results = [];\nfor (const item of items) {\n  const cfg = item.json.config || {};\n  const title = (item.json.title || '').toLowerCase();\n  const minSalary = Number(cfg.MIN_SALARY || cfg.min_salary_usd || 0);\n  const titleRegexStr = cfg.TITLE_REGEX || cfg.title_regex || 'director|vp|head|customer success';\n  const titleRe = new RegExp(titleRegexStr, 'i');\n  const bannedTerms = (cfg.BLACKLIST_CC || cfg.banned_terms_csv || []);\n  // Hard filters\n  if (!titleRe.test(title)) continue;\n  if (cfg.REMOTE_ONLY && !item.json.remoteFlag) continue;\n  if (cfg.US_ONLY && !item.json.isUS) continue;\n  if (Array.isArray(bannedTerms) && bannedTerms.some(term => title.includes(String(term).toLowerCase()))) continue;\n  if (minSalary && item.json.compMin && item.json.compMin < minSalary) continue;\n  // Simple heuristic score\n  let score = 50;\n  if (/director|vp|head/.test(title)) score += 20;\n  if (item.json.remoteFlag) score += 10;\n  if (item.json.compMin && item.json.compMin >= minSalary) score += 10;\n  if (cfg.PREFERRED_C && typeof cfg.PREFERRED_C === 'object') {\n    const preferred = Object.keys(cfg.PREFERRED_C).map(k => k.toLowerCase());\n    if (preferred.includes((item.json.company || '').toLowerCase())) score += 10;\n  }\n  item.json.fitScore = score;\n  results.push(item);\n}\nreturn results;"
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Filter & Score Code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {}
+  },
+  {
+    "name": "Notification Agent",
+    "active": false,
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Start",
+        "type": "n8n-nodes-base.start",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Read Seen",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2,
+        "position": [
+          250,
+          200
+        ],
+        "parameters": {
+          "operation": "read",
+          "sheetId": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "range": "Seen!A:D",
+          "valueRenderMode": "UNFORMATTED_VALUE",
+          "returnAll": true
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "",
+            "name": "Google Sheets OAuth2"
+          }
+        }
+      },
+      {
+        "id": "3",
+        "name": "Dedup & Prepare",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          500,
+          200
+        ],
+        "parameters": {
+          "functionCode": "// Filter incoming jobs against seen hashes and prepare rows for Matches and Seen.\nconst seenRows = $items('Read Seen')[0].json;\nconst seenHashes = new Set();\nif (Array.isArray(seenRows)) {\n  for (let i = 1; i < seenRows.length; i++) {\n    const row = seenRows[i];\n    if (row && row[0]) seenHashes.add(row[0]);\n  }\n}\nconst newMatches = [];\nconst newSeen = [];\nconst notifications = [];\nfor (const item of items) {\n  const hash = item.json.hash;\n  if (seenHashes.has(hash)) continue;\n  // Append to matches\n  newMatches.push([\n    hash,\n    item.json.source,\n    item.json.company,\n    item.json.title,\n    item.json.location,\n    item.json.url,\n    item.json.compMin || '',\n    item.json.compMax || '',\n    item.json.currency || '',\n    item.json.postedAt || '',\n    item.json.fitScore || '',\n    ''\n  ]);\n  // Append to seen\n  const now = new Date().toISOString();\n  newSeen.push([hash, now, now, item.json.url]);\n  // Notification data\n  notifications.push(item.json);\n}\nreturn [ { json: { matches: newMatches, seen: newSeen, notifications } } ];"
+        }
+      },
+      {
+        "id": "4",
+        "name": "Append Matches",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2,
+        "position": [
+          750,
+          150
+        ],
+        "parameters": {
+          "operation": "append",
+          "sheetId": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "range": "Matches!A:L",
+          "options": {
+            "rawData": false
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "",
+            "name": "Google Sheets OAuth2"
+          }
+        }
+      },
+      {
+        "id": "5",
+        "name": "Append Seen",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2,
+        "position": [
+          750,
+          250
+        ],
+        "parameters": {
+          "operation": "append",
+          "sheetId": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "range": "Seen!A:D",
+          "options": {
+            "rawData": false
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "",
+            "name": "Google Sheets OAuth2"
+          }
+        }
+      },
+      {
+        "id": "6",
+        "name": "Send Notifications",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          1000,
+          200
+        ],
+        "parameters": {
+          "functionCode": "// Send notifications via configured channels.\n            if (!items.length) return items;\n            const all = items[0].json;\n            const cfg = all.notifications && all.notifications.length > 0 ? all.notifications[0].config : {};\n            const notifyEmail = cfg.notify_email || cfg.NOTIFY_EMAIL || '';\n            const slackUrl = cfg.notify_slack_webhook || cfg.NOTIFY_SLACK_WEBHOOK || '';\n            const telegramChat = cfg.notify_telegram_chat_id || cfg.NOTIFY_TELEGRAM_CHAT_ID || '';\n            const telegramToken = cfg.notify_telegram_token || cfg.NOTIFY_TELEGRAM_TOKEN || '';\n            for (const notification of all.notifications) {\n              const message = `New match: ${notification.title} at ${notification.company}\nScore: ${notification.fitScore}\n${notification.url}`;\n              if (slackUrl) {\n                await this.helpers.httpRequest({ method: 'POST', url: slackUrl, body: { text: message }, json: true });\n              }\n              if (telegramChat && telegramToken) {\n                const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;\n                await this.helpers.httpRequest({ method: 'POST', url, body: { chat_id: telegramChat, text: message }, json: true });\n              }\n              // Email support omitted here but can be added via Gmail node.\n            }\n            return items;"
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Read Seen",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Seen": {
+        "main": [
+          [
+            {
+              "node": "Dedup & Prepare",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dedup & Prepare": {
+        "main": [
+          [
+            {
+              "node": "Append Matches",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Append Seen",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Send Notifications",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {}
+  },
+  {
+    "name": "Analytics Agent",
+    "active": false,
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Start",
+        "type": "n8n-nodes-base.start",
+        "typeVersion": 1,
+        "position": [
+          0,
+          200
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Analytics Code",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          300,
+          200
+        ],
+        "parameters": {
+          "functionCode": "// Compute simple analytics from the incoming items\nconst runId = Date.now().toString();\nconst startedAt = new Date().toISOString();\nconst finishedAt = new Date().toISOString();\nconst jobsFetched = items.length;\nconst matches = items.length;\nconst matchRate = 100;\nconst analyticsRow = [runId, startedAt, finishedAt, jobsFetched, jobsFetched, jobsFetched, matches, matchRate, 0, false];\nreturn [ { json: { analytics: analyticsRow } } ];"
+        }
+      },
+      {
+        "id": "3",
+        "name": "Append Analytics",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 2,
+        "position": [
+          600,
+          200
+        ],
+        "parameters": {
+          "operation": "append",
+          "sheetId": "1yONIm0q7wj8JvCaqbWFIH3hHztJD53-NYqIAl-VeOPk",
+          "range": "Analytics!A:J",
+          "options": {
+            "rawData": false
+          }
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "",
+            "name": "Google Sheets OAuth2"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Analytics Code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analytics Code": {
+        "main": [
+          [
+            {
+              "node": "Append Analytics",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {}
+  }
+]
